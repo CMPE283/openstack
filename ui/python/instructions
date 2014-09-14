@@ -8,8 +8,8 @@ Linux Instructions:
 
         --> In Ubuntu add the below lines to file "/etc/apache2/sites-enabled/000-default"
 
-                    ScriptAlias /test-cgi/ /var/www/test-cgi/
-                    <Directory "/var/www/test-cgi">
+                    ScriptAlias /cgi/ /var/www/cgi/
+                    <Directory "/var/www/cgi">
                             AllowOverride None
                             Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
                             Order allow,deny
