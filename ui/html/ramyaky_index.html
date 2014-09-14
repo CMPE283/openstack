@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Dashboard Template for Bootstrap</title>
+
+    <link href="/bootstrap-3.2.0-dist/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="dashboard.css" rel="stylesheet">
+
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+    
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+    
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+
+<!-- ramyaky code comes here -->
+
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <style>
+        body { font-size: 120.5%; }
+        label, input { display:block; }
+        input.text { margin-bottom:12px; width:95%; padding: .4em; }
+        fieldset { padding:0; border:0; margin-top:25px; }
+        h1 { font-size: 1.2em; margin: .6em 0; }
+        .ui-dialog .ui-state-error { padding: .3em; }
+        .validateTips { border: 1px solid transparent; padding: 0.3em; }
+    </style>
+
+    <style>
+        table {
+            width:50%;
+        }
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
+
+        table.names tr:nth-child(even) {
+            background-color: #f1f1c1;
+        }
+        table.names tr:nth-child(odd) {
+           background-color:#ffffff;
+        }
+        table.names th  {
+            background-color: #c1c1c1;
+        }
+    </style>
+
+    <script type="text/javascript">
+
+      $(function() {
+    
+        var dialog, form;
+
+        function addInterface() {
+            imageString = $( "#image-list option:selected" ).text()
+            flavorString = $("#flavor-list option:selected").text()
+            networkString = $("#network-list option:selected").text()
+            instanceName = $("#instance-id").val()
+    
+            image = (imageString.split(" --> ")[1]);
+            flavor = (flavorString.split(" --> ")[1]);
+            network = (networkString.split(" --> ")[1]);
+ 
+             $("#instance-status").empty();
+             $.ajax({
+                url: "http://localhost/cgi/cli.py",
+                data: {
+                    image_id: image,
+                    flavor_id: flavor,
+                    network_id: network,
+                    instance_name: instanceName
+                },
+                async: false, 
+                type: "POST",
+                success: function(result){
+                    $("#instance-status").append(result)
+                    $("#instance-status").fadeIn(1000);
+                    $("#instance-status").fadeOut(3000);
+                }
+            });
+        
+            dialog.dialog("close"); 
+        }   
+
+        dialog = $( "#dialog-form" ).dialog({
+            autoOpen: false,
+            height: 430,
+            width: 450,
+            modal: true,
+            buttons: {
+                "Create": addInterface,
+                Cancel: function() {
+                    dialog.dialog( "close" );
+                }
+            },
+            close: function() {
+                form[ 0 ].reset();
+            }
+        });
+
+        form = dialog.find( "form" ).on( "submit", function( event ) {
+            event.preventDefault();
+            addInterface();
+        });
+
+        $( "#create-instance" ).button().on( "click", function() {
+            dialog.dialog( "open" );
+        });
+    
+        $("#billing").click( function() {
+            $.ajax({
+                url: "http://localhost/cgi/ceilometer.py",
+                async: false,
+                success: function(result){
+                        $("#show-billing").append(result);
+                }
+            });
+        });
+      });
+
+    </script>
+
+    <script>
+
+      function getAllComponents() {
+        $("#instance-status").hide();
+        $.ajax({
+            url: "http://localhost/cgi/get_components_list.py",
+            success: function(result){
+                $("#get-list").after(result);
+            }
+        });
+      }
+        
+      function parseResult( result ) {
+        var output = result;
+        alert(output);
+      }
+
+    </script>
+</head>
+
+<body onload="getAllComponents()">
+    <div id="dialog-form" title="Create New Instance">
+    <p class="validateTips">All form fields are required.</p>
+    <form>
+        <fieldset>
+            <label for="instance-id"> Instance Name </label>
+            <input type="text" name="instance-name" id="instance-id" class="text ui-widget-content ui-corner-all">
+            <div id="get-list">
+            </div>
+
+            <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+        </fieldset>
+    </form>
+    </div>
+
+<!-- ramyaky code ends here -->
+
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Project name</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="#">Help</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </div>
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header">Dashboard</h1>
+
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img data-src="holder.js/200x200/auto/sky" class="img-responsive" alt="Generic placeholder thumbnail">
+              <br></br>
+        
+        <!-- ramyaky code again starts here -->
+                <div>
+                    <button id="create-instance">Create Instance</button>
+                </div>
+        <!-- ramyaky code ends here -->
+
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img data-src="holder.js/200x200/auto/vine" class="img-responsive" alt="Generic placeholder thumbnail">
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img data-src="holder.js/200x200/auto/sky" class="img-responsive" alt="Generic placeholder thumbnail">
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img data-src="holder.js/200x200/auto/vine" class="img-responsive" alt="Generic placeholder thumbnail">
+              <h4> 
+               
+            <!-- ramyaky code starts here -->
+
+                 <a id="billing" href = "#"> Billing</a> 
+               
+            <!-- ramyaky code ends here -->
+                
+              </h4>
+              <span class="text-muted">Something else</span>
+            </div>
+          </div>
+
+        </div>
+
+  <!-- ramyaky code starts here -->
+    
+          <div id="show-billing" align="center"> </div>
+
+    <!-- ramyaky code ends here -->
+  </body>
+</html>
