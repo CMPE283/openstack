@@ -1,0 +1,25 @@
+Linux Instructions:
+
+--> Move the python scripts under /var/www/cgi/<python_scripts>
+
+--> You should have apache installed and running.
+
+--> Modify the apache configuration to store CGI scripts at another folder  
+
+        --> In Ubuntu add the below lines to file "/etc/apache2/sites-enabled/000-default"
+
+                    ScriptAlias /test-cgi/ /var/www/test-cgi/
+                    <Directory "/var/www/test-cgi">
+                            AllowOverride None
+                            Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+                            Order allow,deny
+                            Allow from all
+                    </Directory>
+    
+        --> Restart apache
+
+Please follow corrsponding steps for your operating system. 
+
+--> For MAC, this may useful.
+        
+       http://support.apple.com/kb/TS3053?viewlocale=en_US 
