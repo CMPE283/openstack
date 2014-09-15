@@ -94,10 +94,12 @@
                 async: false, 
                 type: "POST",
                 success: function(result){
-                    alert(result);
+                    $("#create-instance-form").hide();
+                    $("#flip").append(result)
+                    $("#flip").fadeToggle(3000);
+                    $("#flip").fadeToggle(3000);  
                 }
             });
-            $("#create-instance-form").hide();
         } 
     </script>
     
@@ -107,6 +109,7 @@
         $("#create-instance-form").hide();
         $("#show-usage").hide();
         $("#show-last5-usage").hide()
+        $("#flip").hide();
         $.ajax({
             url: "http://localhost/cgi/get_components_list.py",
             success: function(result){
@@ -146,6 +149,15 @@
         .table-align {
             text-align: center;
         }
+        #flip {
+            width:15%;
+            margin:auto 84%;
+            padding:10px;
+            text-align:center;
+            background:#e5eecc;
+            border:solid 1px #c3c3c3;
+        }
+
     </style>   
 
 </head>
@@ -188,7 +200,7 @@
                             <div class="panel-heading">
                                 <div class="row">
                                     <div class="col-xs-3">
-                                        <i class="fa fa-comments fa-5x"></i>
+                                        <i class="fa fa-tasks fa-5x"></i>
                                     </div>
                                     <div class="col-xs-9 text-right">
                                         <div class="huge">26</div>
@@ -198,7 +210,7 @@
                             </div>
                             <a href="#">
                                 <div class="panel-footer">
-                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-left">List Instances</span>
                                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                                     <div class="clearfix"></div>
                                 </div>
@@ -210,7 +222,7 @@
                             <div class="panel-heading">
                                 <div class="row">
                                     <div class="col-xs-3">
-                                        <i class="fa fa-tasks fa-5x"></i>
+                                        <i class="fa fa-desktop fa-5x"> </i>
                                     </div>
                                     <div class="col-xs-9 text-right">
                                         <div class="huge">12</div>
@@ -232,7 +244,7 @@
                             <div class="panel-heading">
                                 <div class="row">
                                     <div class="col-xs-3">
-                                        <i class="fa fa-shopping-cart fa-5x"></i>
+                                        <i class="fa  fa-4x"> $$ </i>
                                     </div>
                                     <div class="col-xs-9 text-right">
                                         <div class="huge">124</div>
@@ -264,7 +276,7 @@
                             </div>
                             <a href="#">
                                 <div class="panel-footer">
-                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-left">List Images</span>
                                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                                     <div class="clearfix"></div>
                                 </div>
@@ -274,7 +286,7 @@
                 </div>
             </div>
         </div>
-        <br></br><br></br>
+        <br></br>
         <div class="row" align="center" id="create-instance-form" style="width:1000px;margin:0 auto;">
             <div class="col-lg-12">
                 <div class="panel panel-default">
@@ -292,6 +304,9 @@
                 </div>
             </div>
         </div>
+        <div id="flip" align="right">
+        </div>
+
     
         <div class="row" align="center" id="show-usage">
             <div class="col-lg-9">
