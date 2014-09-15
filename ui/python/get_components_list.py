@@ -6,13 +6,14 @@ import json
 
 def printOutput(url,headers, component, componentName):
     decoded = get_json(url, headers)
-    print "<label for=\"" + component + "-id\"> Select " + component.title() + "</label>"
-    print "<select id=\"" + component + "-list\">"
+    print '<tr>'
+    print "<td> <label for=\"" + component + "-id\"> Select " + component.title() + "</label> </td>"
+    print "<td> <select id=\"" + component + "-list\">"
     print "<option value=\"-1\"> ----- Select" + component.title() + " ID ------ </option>"
     for i in range(0, len(decoded[componentName])):
         print "<option value=\"" + str(i) + "\">" + decoded[componentName][i]['name'] + " --> " + decoded[componentName][i]['id']  + "</option>"
-    print "</select>"
-    print "<br></br>"
+    print "</select> </td>"
+    print "</tr>"
 
 
 
@@ -29,6 +30,9 @@ print '<head>'
 print '<title>Getting token from Openstack</title>'
 print '</head>'
 print '<body>'
+print '<table border="0" width="60%">'
+print '<tr> <td> <label for="instance-id"> Instance Name </label> </td>'
+print '<td> <input type="text" name="instance-name" id="instance-id"> </td> </tr>'
 token = get_token()
 tenantId = get_tenant_id()
 
@@ -60,5 +64,6 @@ apiPort = "9696"
 url = "http://" + hostIP + ":" + apiPort + apiPath
 printOutput(url, headers, "network", 'networks')
 
+print '</table>'
 print '</body>'
 print '</html>'

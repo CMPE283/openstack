@@ -7,11 +7,17 @@ import cgi, cgitb
 
 tenant_id = get_tenant_id()
 form = cgi.FieldStorage()
-
 imageId = form.getvalue('image_id')
 flavorId = form.getvalue('flavor_id')
 networkId = form.getvalue('network_id')
 instanceName = form.getvalue('instance_name')
+
+'''
+imageId = "7e7ebe98-a3ec-4c17-baeb-82847bfd0a52"
+flavorId = "1"
+networkId = "f7ac5fcf-a4f7-4873-931b-44719d5de3df"
+instanceName = "test2"
+'''
 
 global message
 
@@ -31,9 +37,9 @@ cmd = "nova boot --image %s --flavor %s --nic net-id=%s %s | grep \"| id\"" %(im
 s.sendline(cmd)
 s.prompt()
 a = s.before
-if(re.match( r'ERROR', a, re.M|re.I)):
-    message = "Instance Creation Failed"
-elif (re.match( r'(.*)(\| \w{8}-\w{4}-\w{4}-\w{4}-\w{12})(.*)', a, re.M|re.I)):
+if(re.search(r'.*(ERROR.*)', a, re.M)):
+    message = 'Failed to Create'
+elif (re.search( r'(.*)(\| \w{8}-\w{4}-\w{4}-\w{4}-\w{12})(.*)', a, re.M|re.I)):
     message = "Instance Created Successfully"
 else:
     message = "Instance Creation Failed"
