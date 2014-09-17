@@ -123,7 +123,7 @@ function callMakeDivVisible(clickedid){
 	    document.getElementById("createvm").style.display = "none";
         document.getElementById("show-usage").style.display = "none";
         document.getElementById("show-last5-usage").style.display = "none";
-		getImageDetails();
+		//getImageDetails();
 		
 	}
     else if(clickedid=="billingid"){
@@ -220,7 +220,7 @@ function getDetails(){
 /*
 * To get the details of all available images
 */
-
+/*
 function getImageDetails(){
     alert("You clicked me");
     document.getElementById("listimages").style.visibility = "visible";
@@ -243,7 +243,7 @@ function getImageDetails(){
   });
  $("#reservations").show();
 }   
- 	      
+ */	      
 </script>
 <script>
     $(function() {
@@ -269,13 +269,13 @@ function getImageDetails(){
                 element: 'morris-bar-chart',
                 data: x,
                 xkey: 'category',
-                ykeys: ['used'],
-                labels: ['Used'],
+                ykeys: ['percentage'],
+                labels: ['Percentage'],
                 barRatio: 0.4,
                 xLabelAngle: 30,
                 hideHover: 'auto',
                 resize: true,
-                ymax: 20
+                ymax: 100
             });            
 
             $("#billing").click( function() {
@@ -289,6 +289,20 @@ function getImageDetails(){
                     success: function(result){
                         $("#show-billing").empty();
                         $("#show-billing").append(result);
+                    }
+                });
+            });
+            
+            $("#images").click( function() {
+                $("#show-last5-usage").hide();
+                $("#show-usage").hide();
+                
+                $.ajax({
+                    url: "http://localhost/cgi/list_images.py",
+                    async: false,
+                    success: function(result){
+                        $("#images-list-body").empty();
+                        $("#images-list-body").append(result);
                     }
                 });
             });
@@ -324,6 +338,9 @@ function getImageDetails(){
 </script>
 
     <style>
+        #reservations td {
+            text-align: center;
+        }
         table {
             border: 0px solid green;
         }
@@ -499,28 +516,11 @@ function getImageDetails(){
                 </div>
                 <!-- /.row -->
 
-<!--                <div class="row">
-                    <div class="col-lg-3">
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                <h3 class="panel-title"><i class="fa fa-long-arrow-right"></i> Bar Graph Example</h3>
-                            </div>
-                            <div class="panel-body">
-                                <div id="morris-bar-chart"></div>
-                                <div class="text-right">
-                                    <a href="#">View Details <i class="fa fa-arrow-circle-right"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div> -->
-
                 <div class="row" align="center" id="show-usage">
                     <div class="col-lg-9">
-                        <div class="panel panel-default">
+                        <div class="panel panel-red">
                             <div class="panel-heading">
-                                <h3 class="panel-title"> Total Usage </h3>
+                                <h3 class="panel-title"> Current Statement </h3>
                             </div>
                             <div class="panel-body">
                                 <div id="show-billing" align="center"> </div>
@@ -528,7 +528,7 @@ function getImageDetails(){
                         </div>
                     </div>
                     <div class="col-lg-3">
-                        <div class="panel panel-default">
+                        <div class="panel panel-red">
                             <div class="panel-heading">
                                 <h3 class="panel-title"> Rates </h3>
                             </div>
@@ -547,9 +547,9 @@ function getImageDetails(){
 
                 <div class="row" align="center" id="show-last5-usage">
                     <div class="col-lg-9">
-                        <div class="panel panel-default">
+                        <div class="panel panel-red">
                             <div class="panel-heading">
-                                <h3 class="panel-title"> Previous 5 days usage bill </h3>
+                                <h3 class="panel-title"> Past 7 days usage bill </h3>
                             </div>
                             <div class="panel-body">
                                 <div id="show-last5-billing" align="center"> </div>
@@ -565,7 +565,7 @@ function getImageDetails(){
           <div class="col-lg-3" id = "morris-block">
                <div class="panel panel-primary">
                   <div class="panel-heading">
-                                <h3 class="panel-title"><i class="fa fa-long-arrow-right"></i> Instances Usage </h3>
+                                <h3 class="panel-title"><i class="fa fa-long-arrow-right"></i> Resource Usage (in %) </h3>
                             </div>
                             <div class="panel-body">
                                 <div id="morris-bar-chart"></div>
@@ -576,7 +576,7 @@ function getImageDetails(){
           <div class="col-lg-9" id="listinstances" style="display: none;">
            <div class="panel panel-primary">
             <div class="panel-heading">
-                <h4 align="center">List of Available Instances</h4> 
+                <h4 align="center" class="panel-title">List of Available Instances</h4> 
             </div>
             <table class="table table-hover table-striped" id="instanceList" >
               <thead align="left" style="color:#0b62a4;font-size:4;padding:10px;text-align:left;">
@@ -594,21 +594,34 @@ function getImageDetails(){
             </table>
             </div>
           </div>
-
-          <div class="table-responsive" id="listimages" style="display: none;">
+        </div>  
+    
+     <div class="table-responsive" id="listimages" style="display: none;">
+        <div class="container-fluid">
+           <div class="col-lg-13">
+             <div class="panel panel-yellow">
+                <div class="panel-heading">
+                   <h3 class="panel-title" align="center">List of Available Images </h3>
+                </div>
+                <div class="panel-body">
 			<table class="table table-hover table-striped" id="reservations">  
 			  <thead>
 				    <tr>
-						<th>Name</th><th>ID</th>
+						<th>Name</th><th>ID</th><th>Status</th><th>Size</th>
 					</tr>
 			  </thead>
-				<tbody>
+				<tbody id="images-list-body">
 				</tbody>
 			</table>
          </div>
+        </div>
+        </div>
+        </div>
+        </div>
+
         <div class="row" id="createvm" style="display: none;">
                     <div class="col-lg-12">
-                        <div class="panel panel-default">
+                        <div class="panel panel-green">
                             <div class="panel-heading">
                                 <h3 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i> Launch Instance</h3>
                             </div>
@@ -653,7 +666,7 @@ function getImageDetails(){
                           </tr>
                           
                           <tr><td height="60" align="right"><button type="button" onclick="postDetails()">
-                                 Launch
+                                 <a>Launch</a>
                                  </button>
                               <td></tr>
                           </tbody>
