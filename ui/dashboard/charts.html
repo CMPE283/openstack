@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- jQuery Version 1.11.0 -->
+    <script src="js/jquery-1.11.0.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <!-- Morris Charts JavaScript -->
+    <script src="js/plugins/morris/raphael.min.js"></script>
+    <title>Openstack Dashboard</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/sb-admin.css" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="css/plugins/morris.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+<script type="text/javascript">
+
+function postDetails(){
+	
+	var ZoneIndex = document.getElementById("ddavailable");
+	var zoneId = ZoneIndex.options[ZoneIndex.selectedIndex].value;
+	var name =document.getElementById('InsName').value;
+	var ImageId ="835a2d91-22cf-41d9-9554-14a8fa61592d";
+	var flindex = document.getElementById("ddflavors");
+	var FlavorId = flindex.options[flindex.selectedIndex].value;
+	document.getElementById("createvm").style.display = "none";
+    document.getElementById("listinstances").style.display = "block";
+$.post(
+ "http://localhost:9000/compute/virtual-machines/"+zoneId+"/"+name+"/"+ImageId+"/"+FlavorId,function( data ) {
+     
+ 	var jsonResponse = data;
+   var s = "";
+   
+   var tbody = $('#instanceList tbody'),
+   props = ["vmName","imageName","ipAddress","size","status","powerState"];
+  
+   $("#instanceList > tbody").html("");
+        $.each(jsonResponse,function(i,val){
+        	var tr = $('<tr>');
+            $.each(props, function(i, prop) {
+            if(i=="5")
+            {
+            	if(val[prop]=="0")
+            		{val[prop]="No State";
+            		$('<td>').html(val[prop]).appendTo(tr);}
+            	else if(val[prop]=="1")
+            		{val[prop]="Running";
+            		$('<td>').html(val[prop]).appendTo(tr);}
+            	else if(val[prop]=="3")
+        		    {val[prop]="Paused";
+        		    $('<td>').html(val[prop]).appendTo(tr);}
+            	else if(val[prop]=="4")
+        		    {val[prop]="Shutdown";
+        		    $('<td>').html(val[prop]).appendTo(tr);}
+            	else
+            		{val[prop]="Unknown State";
+        		    $('<td>').html(val[prop]).appendTo(tr);}
+            	
+            }else
+            	{
+            $('<td>').html(val[prop]).appendTo(tr);
+            	}
+            
+            });
+            tbody.append(tr);
+            
+         });
+         $("#instanceList").append(s);    
+       
+ });
+ updateCount();
+}  
+  
+function callMakeDivVisible(clickedid){
+	//alert(clickedid);
+	
+	if(clickedid=="ListOFServers")
+	{
+        document.getElementById("morris-block").style.display = "block";
+		document.getElementById("listinstances").style.display = "block";
+	    document.getElementById("listimages").style.display = "none";
+	    document.getElementById("createvm").style.display = "none";
+        document.getElementById("show-usage").style.display = "none";
+        document.getElementById("show-last5-usage").style.display = "none";
+	    getDetails();
+	}
+	else if(clickedid=="CreateVMID"){
+	     document.getElementById("morris-block").style.display = "none";
+		 document.getElementById("listinstances").style.display = "none";
+	     document.getElementById("listimages").style.display = "none";
+	     document.getElementById("createvm").style.display = "block";	
+         document.getElementById("show-usage").style.display = "none";
+         document.getElementById("show-last5-usage").style.display = "none";
+	     	 		 
+    }else if(clickedid=="images"){
+    
+        document.getElementById("morris-block").style.display = "none";
+		document.getElementById("listinstances").style.display = "none";
+	    document.getElementById("listimages").style.display = "block";
+	    document.getElementById("createvm").style.display = "none";
+        document.getElementById("show-usage").style.display = "none";
+        document.getElementById("show-last5-usage").style.display = "none";
+		getImageDetails();
+		
+	}
+    else if(clickedid=="billingid"){
+        
+        document.getElementById("morris-block").style.display = "none";
+        document.getElementById("listinstances").style.display = "none";
+        document.getElementById("listimages").style.display = "none";
+        document.getElementById("createvm").style.display = "none";
+        document.getElementById("show-usage").style.display = "block";
+        document.getElementById("show-last5-usage").style.display = "none";
+        //getImageDetails();
+        
+    }
+
+  }
+  
+/*
+* Get count of instances
+*/  
+function updateCount(){
+    $("#show-last5-usage").hide();
+    $("#show-usage").hide();
+    callMakeDivVisible("ListOFServers");    
+    getDetails();
+	var count = 0;
+    $.getJSON("http://localhost:9000/compute/virtual-machines", function( data ) {
+    	var jsonResponse = data;
+		$.each(jsonResponse,function(i,val){
+        	count++;
+		});
+		$("#instancesCount").html(count);
+	});
+  updateCountImages();  
+}   
+  
+function updateCountImages(){
+	var count = 0;
+    $.getJSON("http://localhost:9000/compute/virtual-machines/RegionOne/images", function( data ) {
+    	var jsonResponse = data;
+		$.each(jsonResponse,function(i,val){
+        	count++;
+		});
+		$("#imageCount").html(count);
+	});
+}
+   
+/*
+* To get the details of all available instances
+*/
+function getDetails(){
+            $.getJSON("http://localhost:9000/compute/virtual-machines", function( data ) {
+                //console.log(data);
+                //alert(data);
+            	var jsonResponse = data;
+            	   var s = "";
+            	   var tbody = $('#instanceList tbody'),
+            	   props = ["vmName","imageName","ipAddress","size","status","powerState"];
+            	  
+            	   $("#instanceList > tbody").html("");
+            	        $.each(jsonResponse,function(i,val){
+            	        	var tr = $('<tr>');
+            	            $.each(props, function(i, prop) {
+            	            if(i=="5")
+            	            {
+            	            	if(val[prop]=="0")
+            	            		{val[prop]="No State";
+            	            		$('<td>').html(val[prop]).appendTo(tr);}
+            	            	else if(val[prop]=="1")
+            	            		{val[prop]="Running";
+            	            		$('<td>').html(val[prop]).appendTo(tr);}
+            	            	else if(val[prop]=="3")
+            	        		    {val[prop]="Paused";
+            	        		    $('<td>').html(val[prop]).appendTo(tr);}
+            	            	else if(val[prop]=="4")
+            	        		    {val[prop]="Shutdown";
+            	        		    $('<td>').html(val[prop]).appendTo(tr);}
+            	            	else
+            	            		{val[prop]="Unknown State";
+            	        		    $('<td>').html(val[prop]).appendTo(tr);}
+            	            	
+            	            }else
+            	            	{
+            	            $('<td>').html(val[prop]).appendTo(tr);
+            	            	}
+            	            
+            	            });
+            	            tbody.append(tr);
+            	            
+            	         });
+            	         $("#instanceList").append(s);    
+            	       
+            	 });
+} 
+/*
+* To get the details of all available images
+*/
+
+function getImageDetails(){
+    alert("You clicked me");
+    document.getElementById("listimages").style.visibility = "visible";
+    $.getJSON("http://127.0.0.1:9000/compute/virtual-machines/RegionOne/images", function( data ) {
+        console.log(data);
+        alert("Helloooooo");
+        alert(data);
+        var reservations = data;
+        var tbody = $('#reservations tbody'),
+        props = ["name", "id"]; 
+        alert("about to enter for loop");
+      $.each(reservations, function(i, reservation) {
+        alert("looping");
+        var tr = $('<tr>');
+      $.each(props, function(i, prop) {
+        $('<td>').html(reservation[prop]).appendTo(tr); 
+      });
+      tbody.append(tr);
+   });
+  });
+ $("#reservations").show();
+}   
+ 	      
+</script>
+<script>
+    $(function() {
+
+            var x = (function() {
+                    var obj = {};
+                    var arr = []
+                    $.ajax({
+                        url: "http://localhost/cgi/limits.py",
+                        async: false,
+                        success: function(result){
+                            $.each(result, function(k,v){
+                               console.log(k,v)
+                               arr.push(v);
+                            });
+                        }
+                    });
+                    console.log(arr);
+                    return arr;
+                })();
+            // Bar Chart
+            Morris.Bar({
+                element: 'morris-bar-chart',
+                data: x,
+                xkey: 'category',
+                ykeys: ['used'],
+                labels: ['Used'],
+                barRatio: 0.4,
+                xLabelAngle: 30,
+                hideHover: 'auto',
+                resize: true,
+                ymax: 20
+            });            
+
+            $("#billing").click( function() {
+                $("#create-instance-form").hide();
+                $("#show-last5-usage").hide();
+                $("#show-usage").show();
+                
+                $.ajax({
+                    url: "http://localhost/cgi/ceilometer.py",
+                    async: false,
+                    success: function(result){
+                        $("#show-billing").empty();
+                        $("#show-billing").append(result);
+                    }
+                });
+            });
+    });
+</script>
+
+<script>
+        function showLastFive() {
+            $("#show-last5-usage").toggle();
+            
+            $.ajax({
+                url: "http://localhost/cgi/ceilometer_past5.py",
+                async: false,
+                success: function(result){
+                    $("#show-last5-billing").empty()
+                    $("#show-last5-billing").append(result);
+                }
+            });
+        }
+
+      function generateBill() {
+        //$("#generate-bill").hide();
+        $.ajax({
+            url: "http://localhost/cgi/generatebill.py",
+            async: false,
+            success: function(result) {
+                $("#total-bill").empty();
+                $("#generate-bill").after(result);
+            }
+        });
+      }
+
+</script>
+
+    <style>
+        table {
+            border: 0px solid green;
+        }
+        td {
+            padding: 15px;
+        }
+        th {
+            text-align: center;
+        }
+        .table-align {
+            text-align: center;
+        }
+        #flip {
+            width:15%;
+            margin:auto 84%;
+            padding:10px;
+            text-align:center;
+            background:#e5eecc;
+        }
+
+    </style>
+                                                                                                  157,21        38%
+
+</head>
+
+<body onload="updateCount();">
+    <div id="wrapper">
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">OpenStack Dashboard</a>
+            </div>
+
+<!--------------- Modified code starts here -->
+
+            <ul class="nav navbar-right top-nav">
+                 <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> Log Out <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="charts.html"><i class="fa fa-fw fa-dashboard"></i> Home </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="logout.html"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+                        </li>
+                    </ul>
+                </li>
+
+                    </ul>
+                </li>
+            </ul>
+
+<!----------- Modified code ends here -->
+
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav side-nav">
+                    <li class="active">
+                        <a href="charts.html"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+                    </li>
+                    <li >
+                        <a href="storage.html"><i class="fa fa-fw fa-bar-chart-o"></i>Storage</a>
+                    </li>
+                    <li>
+                        <a href="commandline.html"><i class="fa fa-fw fa-edit"></i> Command Line</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </nav>
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-tasks fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="instancesCount"></div>
+                                        <div>Created Instances</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="#" id="ListOFServers" onclick="callMakeDivVisible(this.id)">
+                                <div class="panel-footer">
+                                    <span class="pull-left">List Instances</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                          <i class="fa fa-desktop fa-5x"></i>                                       
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">10</div>
+                                        <div>Available Instances</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="#" id="CreateVMID" onclick="callMakeDivVisible(this.id)">
+                                <div class="panel-footer">
+                                    <span class="pull-left">Create Instance</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-yellow">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-support fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                       <div class="huge" id="imageCount"></div>
+                                        <div>Images</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="#" id="images" onclick="callMakeDivVisible(this.id)">
+                                <div class="panel-footer">
+                                    <span class="pull-left">List Images</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-red">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa  fa-4x"> $$ </i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="bill-hours-value"></div>
+                                        <div>VCPUs Hours Used</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="#" id="billingid" onclick="callMakeDivVisible(this.id)">
+                                <div class="panel-footer">
+                                    <span class="pull-left" id="billing">Billing</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+            
+
+                </div>
+                <!-- /.row -->
+
+<!--                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-long-arrow-right"></i> Bar Graph Example</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div id="morris-bar-chart"></div>
+                                <div class="text-right">
+                                    <a href="#">View Details <i class="fa fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> -->
+
+                <div class="row" align="center" id="show-usage">
+                    <div class="col-lg-9">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"> Total Usage </h3>
+                            </div>
+                            <div class="panel-body">
+                                <div id="show-billing" align="center"> </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"> Rates </h3>
+                            </div>
+                            <div class="panel-body">
+                                <div> Cost of Memory : 10 cents per 100MB* <br></br></div>
+                                <div> Cost of Disk: 25 cents per 1 GB* <br></br></div>
+                                <div> Cost of vCPUs: 50 cents per Hour*  </div>
+                                <div> <h6> * prices are subject to change</h6> </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="row" align="center" id="show-last5-usage">
+                    <div class="col-lg-9">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"> Previous 5 days usage bill </h3>
+                            </div>
+                            <div class="panel-body">
+                                <div id="show-last5-billing" align="center"> </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+
+
+       <div class="container-fluid">
+          <div class="col-lg-3" id = "morris-block">
+               <div class="panel panel-primary">
+                  <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-long-arrow-right"></i> Instances Usage </h3>
+                            </div>
+                            <div class="panel-body">
+                                <div id="morris-bar-chart"></div>
+                            </div>
+               </div>
+           </div>
+
+          <div class="col-lg-9" id="listinstances" style="display: none;">
+           <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4 align="center">List of Available Instances</h4> 
+            </div>
+            <table class="table table-hover table-striped" id="instanceList" >
+              <thead align="left" style="color:#0b62a4;font-size:4;padding:10px;text-align:left;">
+                <tr>
+                  <th>Name</th>
+                  <th>Imgname</th>
+                  <th>IpAddress</th>
+                  <th>Size</th>
+                  <th>Status</th>
+                  <th>PowerState</th>
+                </tr>
+              </thead>
+              <tbody>
+               </tbody>
+            </table>
+            </div>
+          </div>
+
+          <div class="table-responsive" id="listimages" style="display: none;">
+			<table class="table table-hover table-striped" id="reservations">  
+			  <thead>
+				    <tr>
+						<th>Name</th><th>ID</th>
+					</tr>
+			  </thead>
+				<tbody>
+				</tbody>
+			</table>
+         </div>
+        <div class="row" id="createvm" style="display: none;">
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i> Launch Instance</h3>
+                            </div>
+                            <div class="panel-body">
+                          <div align="center"> 
+                          <table style="width:40%" align="center" >
+                          <tbody>
+                          <tr >
+                               <td height="60"><b> Availability Zone:</b></td>
+                               <td>
+                               <select id="ddavailable" >
+                               <option value="RegionOne">nova</option>
+                               
+                               </select>
+                               </td>
+                               
+                          </tr>
+                          <tr >
+                               <td height="60"><b> Instance name:</b></td>
+                               <td><input type="text" id="InsName"></td> 
+                               
+                          </tr>
+                          
+                          <tr>
+                               <td height="60"><b> Instance Flavor:</b></td>
+                               <td>
+                               <select id="ddflavors" >
+                               <option value="1">m1.tiny</option>
+                               <option value="2">m1.small</option>
+                               <option value="3">m1.medium</option>
+                               <option value="4">m1.large</option>
+                               <option value="5">m1.xlarge</option>
+                               </select>
+                               </td> 
+                               
+                          </tr>
+                        
+                          <tr>
+                               <td height="60"><b> Instance Boot Source:</b></td>
+                               <td><input type="text" id="InsBootSrc" disabled="disabled" value="CMPE-MINI (3.0 GB)" ></td> 
+                               
+                          </tr>
+                          
+                          <tr><td height="60" align="right"><button type="button" onclick="postDetails()">
+                                 Launch
+                                 </button>
+                              <td></tr>
+                          </tbody>
+                          </table>
+                           
+                                 </div>
+                                <!--  <div id="morris-area-chart"></div>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <!-- /.row -->
+    <!-- Morris Charts JavaScript -->
+   <script src="js/plugins/morris/raphael.min.js"></script>
+    <script src="js/plugins/morris/morris.min.js"></script>
+    <script src="js/plugins/morris/morris-data.js"></script>
+
+
+</body>
+
+</html>
