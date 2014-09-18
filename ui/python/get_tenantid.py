@@ -12,7 +12,7 @@ def get_tenant_id():
             'X-Auth-Token'  :   token
         }
 
-    hostIP = "localhost"
+    hostIP = get_hostip()
     apiPort = "5000"
     apiPath = "/v2.0/tenants"
     url = "http://" + hostIP + ":" + apiPort + apiPath

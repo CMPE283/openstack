@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin - Bootstrap Admin Template</title>
+    <title>Horizon Dashboard</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -64,7 +64,7 @@
                     var obj = {};
                     var arr = []
                     $.ajax({
-                        url: "http://localhost/cgi/limits.py",
+                        url: "http://10.0.0.16/cgi/limits.py",
                         async: false,
                         success: function(result){
                             $.each(result, function(k,v){
@@ -81,13 +81,13 @@
                 element: 'morris-bar-chart',
                 data: x,
                 xkey: 'category',
-                ykeys: ['used'],
-                labels: ['Used'],
+                ykeys: ['percentage'],
+                labels: ['Percentage'],
                 barRatio: 0.4,
                 xLabelAngle: 30,
                 hideHover: 'auto',
                 resize: true,
-                ymax: 20
+                ymax: 100
             });  
 
             $("#create-instance").click(function() {
@@ -113,7 +113,7 @@
             network = (networkString.split(" --> ")[1]);
             
             $.ajax({
-                url: "http://localhost/cgi/cli.py",
+                url: "http://10.0.0.16/cgi/cli.py",
                 data: {
                     image_id: image,
                     flavor_id: flavor,
@@ -144,7 +144,7 @@
         $("#show-last5-usage").hide()
         $("#flip").hide();
         $.ajax({
-            url: "http://localhost/cgi/get_components_list.py",
+            url: "http://10.0.0.16/cgi/get_components_list.py",
             success: function(result){
                 $("#get-list").after(result);
             }
@@ -156,7 +156,7 @@
     <script>
 
 function getDetails(){
-            $.getJSON("http://localhost:9000/compute/virtual-machines", function( data ) {
+            $.getJSON("http://10.0.0.16:9000/compute/virtual-machines", function( data ) {
                 //console.log(data);
                 //alert(data);
                 var jsonResponse = data;
@@ -217,11 +217,28 @@ function callMakeDivVisible(clickedid){
     }
   }
 
+function updateCount(){
+    $("#show-last5-usage").hide();
+    $("#show-usage").hide();
+    callMakeDivVisible("ListOFServers");    
+    getDetails();
+    var count = 0;
+    $.getJSON("http://10.0.0.16:9000/compute/virtual-machines", function( data ) {
+        var jsonResponse = data;
+        $.each(jsonResponse,function(i,val){
+            count++;
+        });
+        $("#instancesCount").html(count);
+    });
+//  updateCountImages();  
+}   
+
+
 </script>
 
 </head>
 
-<body onload="getAllComponents()">
+<body onload="getAllComponents(); updateCount();">
 
     <div id="wrapper">
 
@@ -293,8 +310,8 @@ function callMakeDivVisible(clickedid){
                                         <i class="fa fa-tasks fa-5x"></i>
                                     </div>
                                     <div class="col-xs-9 text-right">
-                                        <div class="huge">26</div>
-                                        <div>New Comments!</div>
+                                        <div class="huge" id="instancesCount"></div>
+                                        <div>Created Instances</div>
                                     </div>
                                 </div>
                             </div>
@@ -338,7 +355,7 @@ function callMakeDivVisible(clickedid){
           <div class="col-lg-3" id = "morris-block">
                <div class="panel panel-primary">
                   <div class="panel-heading">
-                                <h3 class="panel-title"><i class="fa fa-long-arrow-right"></i> Bar Graph Example</h3>
+                                <h3 class="panel-title"><i class="fa fa-long-arrow-right"></i> Resource Usage (in %)</h3>
                             </div>
                             <div class="panel-body">
                                 <div id="morris-bar-chart"></div>
@@ -349,7 +366,7 @@ function callMakeDivVisible(clickedid){
           <div class="col-lg-9" id="listinstances" style="display: block;">
            <div class="panel panel-primary">
             <div class="panel-heading">
-                <h4 align="center">List of Available Instances</h4>
+                <h4 align="center" class="panel-title">List of Available Instances</h4>
             </div>
             <table class="table table-hover table-striped" id="instanceList" >
               <thead align="left" style="color:#0b62a4;font-size:4;padding:10px;text-align:left;">
@@ -371,7 +388,7 @@ function callMakeDivVisible(clickedid){
 
         <div class="row" align="center" id="create-instance-form" style="width:1650px;margin:0 auto;">
             <div class="col-lg-12">
-                <div class="panel panel-default">
+                <div class="panel panel-green">
                     <div class="panel-heading">
                         <h3 class="panel-title"> Create New Instance</h3>
                     </div>
@@ -380,7 +397,7 @@ function callMakeDivVisible(clickedid){
                         <div id="get-list"> </div>
                     </div>
                     <div> <a><button align="center" type="button" id="create" onclick="createInstance()"> Create </button></a>
-                           &nbsp &nbsp &nbsp &nbsp<a href="http://localhost/dashboard/index.html"><button align="center" type="button" id="create"> Cancel </button></a>
+                           &nbsp &nbsp &nbsp &nbsp<a href="http://10.0.0.16/dashboard/index.html"><button align="center" type="button" id="create"> Cancel </button></a>
                     </div>
                     <br></br>
                 </div>

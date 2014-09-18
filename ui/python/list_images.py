@@ -5,12 +5,15 @@ import urllib2
 import json
 import cgi, cgitb
 
+def get_images_count(decoded):
+    return len(decoded['images'])
+
 token = get_token()
 tenantId = get_tenant_id()
 
 apiPath = "/v2/images"
 apiPort = "9292"
-hostIP = "localhost"
+hostIP = get_hostip()
 url = "http://" + hostIP + ":" + apiPort + apiPath
 headers = {
             'Content-Type'  :   'application/json',
@@ -25,6 +28,7 @@ formatted = json.dumps(decoded, sort_keys = True, indent = 3)
 #print '<table>'
 #print '<html><head></head><body>'
 #print '<table>'
+get_images_count(decoded)
 for i in range(0,len(decoded['images'])):
     print '<tr><td>'
     print decoded['images'][i]['name'] + "</td><td>"

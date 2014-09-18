@@ -5,6 +5,7 @@ import urllib2
 import json
 import re
 import cgi, cgitb
+from get_token import *
 
 form = cgi.FieldStorage()
 userName=form.getvalue('username')
@@ -19,7 +20,7 @@ global msg
 
 
 
-hostIP = "localhost"
+hostIP = get_hostip()
 tenantName = "admin"
 
 

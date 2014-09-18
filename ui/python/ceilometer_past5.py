@@ -25,7 +25,7 @@ print '<div>'
 token = get_token()
 tenantId = get_tenant_id()
 apiPort = "8774"
-hostIP = "localhost"
+hostIP = get_hostip()
 headers = {
             'Content-Type'  :   'application/json',
             'Accept'        :   'application/json',
@@ -40,7 +40,7 @@ currentDay = datetime.date.today().strftime("%d")
 
 printHeaders()
 
-numOfDays = 12
+numOfDays = 7
 previousFive = (int(currentDay) - numOfDays) + 1
 
 for day in range(previousFive, int(currentDay) + 1):

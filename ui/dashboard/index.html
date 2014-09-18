@@ -45,7 +45,6 @@ function userAuthnew(){
 	
 	var userid =document.getElementById('txtUsrName').value;
 	var password =document.getElementById('txtpassword').value;
-	alert(userid);
 	//var exdays="2";
 	
 	//setCookie("username", userid, 2);
@@ -55,32 +54,29 @@ function userAuthnew(){
 	
 	
 	$.ajax({
-        url: "http://localhost/cgi/authentication.py",
+        url: "http://10.0.0.16/cgi/authentication.py",
         data: {username: userid,userpd: password},
         async:false,
         type: 'POST',
         dataType:"json",
         success: function(data)
         {
-        	
         var jsonResponse=data;
        
         	var msgfrmscript=$.parseJSON(jsonResponse);
         	if(msgfrmscript.msg == "Login Success")
         		{
-        		
-        		window.location.replace("http://localhost/dashboard/charts.html");
+        		window.location.replace("http://10.0.0.16/dashboard/charts.html");
         		}
         	else
         		{
-        		
-        		window.location.replace("http://localhost/dashboard/error-page.html")
+        		window.location.replace("http://10.0.0.16/dashboard/error-page.html")
         		}
          
         },
 	  error: function(data,status,error)
 	   {  
-	   window.location.replace("/error-page.html");
+	   window.location.replace("http://10.0.0.16/dashboard/error-page.html");
 		  
 	   }
 	

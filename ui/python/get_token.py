@@ -5,7 +5,7 @@ from os import environ as env
 
 def get_token():
     password = "a28d36fd90074d0c"
-    hostIP = "localhost"
+    hostIP = get_hostip()
     tenantName = "admin"
     userName = "admin"
 
@@ -24,3 +24,8 @@ def get_token():
     decoded = json.loads(response.decode('utf8'))
     token = decoded['access']['token']['id']
     return token
+
+def get_hostip():
+    hostAddress = "10.0.2.15"
+    return hostAddress
+

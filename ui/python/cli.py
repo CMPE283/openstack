@@ -4,6 +4,7 @@ import getpass
 import re
 from get_tenantid import *
 import cgi, cgitb
+from get_token import *
 
 tenant_id = get_tenant_id()
 form = cgi.FieldStorage()
@@ -29,7 +30,7 @@ print '</head>'
 print '<body>'
 
 s = pxssh.pxssh();
-hostname = "localhost"
+hostname = get_hostip()
 username = "root"
 password = "CMPE283"
 s.login(hostname, username, password, port="2022")

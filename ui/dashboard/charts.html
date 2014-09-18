@@ -49,7 +49,7 @@ function postDetails(){
 	document.getElementById("createvm").style.display = "none";
     document.getElementById("listinstances").style.display = "block";
 $.post(
- "http://localhost:9000/compute/virtual-machines/"+zoneId+"/"+name+"/"+ImageId+"/"+FlavorId,function( data ) {
+ "http://10.0.0.16:9000/compute/virtual-machines/"+zoneId+"/"+name+"/"+ImageId+"/"+FlavorId,function( data ) {
      
  	var jsonResponse = data;
    var s = "";
@@ -149,32 +149,32 @@ function updateCount(){
     callMakeDivVisible("ListOFServers");    
     getDetails();
 	var count = 0;
-    $.getJSON("http://localhost:9000/compute/virtual-machines", function( data ) {
+    $.getJSON("http://10.0.0.16:9000/compute/virtual-machines", function( data ) {
     	var jsonResponse = data;
 		$.each(jsonResponse,function(i,val){
         	count++;
 		});
 		$("#instancesCount").html(count);
 	});
-  updateCountImages();  
+  //updateCountImages();  
 }   
   
-function updateCountImages(){
+/*function updateCountImages(){
 	var count = 0;
-    $.getJSON("http://localhost:9000/compute/virtual-machines/RegionOne/images", function( data ) {
+    $.getJSON("http://10.0.0.16:9000/compute/virtual-machines/RegionOne/images", function( data ) {
     	var jsonResponse = data;
 		$.each(jsonResponse,function(i,val){
         	count++;
 		});
 		$("#imageCount").html(count);
 	});
-}
+}*/
    
 /*
 * To get the details of all available instances
 */
 function getDetails(){
-            $.getJSON("http://localhost:9000/compute/virtual-machines", function( data ) {
+            $.getJSON("http://10.0.0.16:9000/compute/virtual-machines", function( data ) {
                 //console.log(data);
                 //alert(data);
             	var jsonResponse = data;
@@ -252,7 +252,7 @@ function getImageDetails(){
                     var obj = {};
                     var arr = []
                     $.ajax({
-                        url: "http://localhost/cgi/limits.py",
+                        url: "http://10.0.0.16/cgi/limits.py",
                         async: false,
                         success: function(result){
                             $.each(result, function(k,v){
@@ -284,7 +284,7 @@ function getImageDetails(){
                 $("#show-usage").show();
                 
                 $.ajax({
-                    url: "http://localhost/cgi/ceilometer.py",
+                    url: "http://10.0.0.16/cgi/ceilometer.py",
                     async: false,
                     success: function(result){
                         $("#show-billing").empty();
@@ -298,7 +298,7 @@ function getImageDetails(){
                 $("#show-usage").hide();
                 
                 $.ajax({
-                    url: "http://localhost/cgi/list_images.py",
+                    url: "http://10.0.0.16/cgi/list_images.py",
                     async: false,
                     success: function(result){
                         $("#images-list-body").empty();
@@ -306,6 +306,7 @@ function getImageDetails(){
                     }
                 });
             });
+        
     });
 </script>
 
@@ -314,7 +315,7 @@ function getImageDetails(){
             $("#show-last5-usage").toggle();
             
             $.ajax({
-                url: "http://localhost/cgi/ceilometer_past5.py",
+                url: "http://10.0.0.16/cgi/ceilometer_past5.py",
                 async: false,
                 success: function(result){
                     $("#show-last5-billing").empty()
@@ -326,7 +327,7 @@ function getImageDetails(){
       function generateBill() {
         //$("#generate-bill").hide();
         $.ajax({
-            url: "http://localhost/cgi/generatebill.py",
+            url: "http://10.0.0.16/cgi/generatebill.py",
             async: false,
             success: function(result) {
                 $("#total-bill").empty();
@@ -334,10 +335,34 @@ function getImageDetails(){
             }
         });
       }
+    
+      function getVcpus() {
+        $.ajax({
+            url: "http://10.0.0.16/cgi/getVcpus.py",
+            async: false,
+            success: function(result) {
+                $("#bill-hours-value").empty();
+                $("#bill-hours-value").append(result);
+            }
+        });
+      } 
+    
+      function getImageCount() {
+        $.ajax({
+            url: "http://10.0.0.16/cgi/images_count.py",
+            sucess: function(result) {
+               $("#imageCount").empty();
+               $("#imageCount").append(result);
+            }
+        });
+     } 
 
 </script>
 
     <style>
+        #instanceList td {
+            text-align: center;
+        }
         #reservations td {
             text-align: center;
         }
@@ -366,7 +391,7 @@ function getImageDetails(){
 
 </head>
 
-<body onload="updateCount();">
+<body onload="updateCount(); getVcpus(); getImageCount()">
     <div id="wrapper">
         <!-- Navigation -->
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -494,7 +519,7 @@ function getImageDetails(){
                             <div class="panel-heading">
                                 <div class="row">
                                     <div class="col-xs-3">
-                                        <i class="fa  fa-4x"> $$ </i>
+                                        <i class="fa  fa-5x"> $ </i>
                                     </div>
                                     <div class="col-xs-9 text-right">
                                         <div class="huge" id="bill-hours-value"></div>
@@ -533,9 +558,9 @@ function getImageDetails(){
                                 <h3 class="panel-title"> Rates </h3>
                             </div>
                             <div class="panel-body">
-                                <div> Cost of Memory : 10 cents per 100MB* <br></br></div>
-                                <div> Cost of Disk: 25 cents per 1 GB* <br></br></div>
-                                <div> Cost of vCPUs: 50 cents per Hour*  </div>
+                                <!--<div> Cost of Memory : 10 cents per 100MB* <br></br></div>
+                                <div> Cost of Disk   : 25 cents per 1 GB* <br></br></div> -->
+                                <div> Cost of vCPUs  : 50 cents per Hour* </div>
                                 <div> <h6> * prices are subject to change</h6> </div>
                             </div>
 
@@ -549,7 +574,7 @@ function getImageDetails(){
                     <div class="col-lg-9">
                         <div class="panel panel-red">
                             <div class="panel-heading">
-                                <h3 class="panel-title"> Past 7 days usage bill </h3>
+                                <h3 class="panel-title"> Past 7 days usage </h3>
                             </div>
                             <div class="panel-body">
                                 <div id="show-last5-billing" align="center"> </div>

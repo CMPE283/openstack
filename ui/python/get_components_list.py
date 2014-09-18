@@ -40,7 +40,7 @@ tenantId = get_tenant_id()
 
 apiPath = "/v1/images/detail"
 apiPort = "9292"
-hostIP = "localhost"
+hostIP = get_hostip()
 headers = {
             'Content-Type'  :   'application/json',
             'Accept'        :   'application/json',
