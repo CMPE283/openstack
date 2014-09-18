@@ -73,10 +73,10 @@ public class JCloudsNova implements Closeable {
         
         String provider = "openstack-nova";
         String identity = "admin:admin"; // tenantName:userName
-        String credential = "9a6074db7ee446c5";
+        String credential = "a28d36fd90074d0c";
 
         novaApi = ContextBuilder.newBuilder(provider)
-                .endpoint("http://10.0.2.15:35357/v2.0/")
+                .endpoint("http://10.0.0.16:35357/v2.0/")
                 .credentials(identity, credential)
                 .modules(modules)
                 .buildApi(NovaApi.class);
@@ -85,13 +85,14 @@ public class JCloudsNova implements Closeable {
         
         String neutronProvider = "openstack-neutron";
         neutronApi = ContextBuilder.newBuilder(neutronProvider)
-                .endpoint("http://10.0.2.15:35357/v2.0/")
+                .endpoint("http://10.0.0.16:35357/v2.0/")
                 .credentials(identity, credential)
                 .modules(modules)
                 .buildApi(NeutronApi.class);
        
         
         zones = novaApi.getConfiguredZones();
+        System.out.println("............................" + zones );
     }
 
     public Set<String> listZones(){
@@ -115,6 +116,7 @@ public class JCloudsNova implements Closeable {
     }
 
     public List<ImageView> listImagesForZone(String zoneId){
+        System.out.println("In Jclouds nova file");
     	ImageApi imageApi = novaApi.getImageApiForZone(zoneId);
     	List<ImageView> imageViewList = new ArrayList<ImageView>();
     	for(Image image:imageApi.listInDetail().concat()){
