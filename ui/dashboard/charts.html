@@ -81,7 +81,7 @@ function postDetails(){
     document.getElementById("createvm").style.display = "none";
     document.getElementById("listinstances").style.display = "block";
 $.post(
- "http://10.0.0.16:9000/compute/virtual-machines/"+zoneId+"/"+name+"/"+ImageId+"/"+FlavorId+"/"+usercookie+"/"+pswdcookie,function( data ) {
+ "http://192.168.1.98:9000/compute/virtual-machines/"+zoneId+"/"+name+"/"+ImageId+"/"+FlavorId+"/"+usercookie+"/"+pswdcookie,function( data ) {
      
     var jsonResponse = data;
    var s = "";
@@ -183,7 +183,7 @@ function updateCount(){
     callMakeDivVisible("ListOFServers");    
     getDetails();
 	var count = 0;
-    $.getJSON("http://10.0.0.16:9000/compute/virtual-machines/"+usercookie+"/"+pswdcookie, function( data ) {
+    $.getJSON("http://192.168.1.98:9000/compute/virtual-machines/"+usercookie+"/"+pswdcookie, function( data ) {
     	var jsonResponse = data;
 		$.each(jsonResponse,function(i,val){
         	count++;
@@ -195,7 +195,7 @@ function updateCount(){
   
 /*function updateCountImages(){
 	var count = 0;
-    $.getJSON("http://10.0.0.16:9000/compute/virtual-machines/RegionOne/images", function( data ) {
+    $.getJSON("http://192.168.1.98:9000/compute/virtual-machines/RegionOne/images", function( data ) {
     	var jsonResponse = data;
 		$.each(jsonResponse,function(i,val){
         	count++;
@@ -208,7 +208,7 @@ function updateCount(){
 * To get the details of all available instances
 
 function getDetails(){
-            $.getJSON("http://10.0.0.16:9000/compute/virtual-machines", function( data ) {
+            $.getJSON("http://192.168.1.98:9000/compute/virtual-machines", function( data ) {
                 //console.log(data);
                 //alert(data);
             	var jsonResponse = data;
@@ -254,7 +254,7 @@ function getDetails(){
 */
 
 function getDetails(){
-            $.getJSON("http://10.0.0.16:9000/compute/virtual-machines/"+usercookie+"/"+pswdcookie, function( data ) {               
+            $.getJSON("http://192.168.1.98:9000/compute/virtual-machines/"+usercookie+"/"+pswdcookie, function( data ) {               
                 var jsonResponse = data;
                    var s = "";
                    var tbody = $('#instanceList tbody'),
@@ -331,16 +331,16 @@ function getImageDetails(){
                     var obj = {};
                     var arr = []
                     $.ajax({
-                        url: "http://10.0.0.16/cgi/limits.py",
+                        url: "http://192.168.1.98/cgi/limits.py",
                         async: false,
                         success: function(result){
                             $.each(result, function(k,v){
-                               console.log(k,v)
+                               //console.log(k,v)
                                arr.push(v);
                             });
                         }
                     });
-                    console.log(arr);
+                    //console.log(arr);
                     return arr;
                 })();
             // Bar Chart
@@ -363,7 +363,7 @@ function getImageDetails(){
                 $("#show-usage").show();
                 
                 $.ajax({
-                    url: "http://10.0.0.16/cgi/ceilometer.py",
+                    url: "http://192.168.1.98/cgi/ceilometer.py",
                     async: false,
                     success: function(result){
                         $("#show-billing").empty();
@@ -377,7 +377,7 @@ function getImageDetails(){
                 $("#show-usage").hide();
                 
                 $.ajax({
-                    url: "http://10.0.0.16/cgi/list_images.py",
+                    url: "http://192.168.1.98/cgi/list_images.py",
                     async: false,
                     success: function(result){
                         $("#images-list-body").empty();
@@ -394,7 +394,7 @@ function getImageDetails(){
             $("#show-last5-usage").toggle();
             
             $.ajax({
-                url: "http://10.0.0.16/cgi/ceilometer_past5.py",
+                url: "http://192.168.1.98/cgi/ceilometer_past5.py",
                 async: false,
                 success: function(result){
                     $("#show-last5-billing").empty()
@@ -406,7 +406,7 @@ function getImageDetails(){
       function generateBill() {
         //$("#generate-bill").hide();
         $.ajax({
-            url: "http://10.0.0.16/cgi/generatebill.py",
+            url: "http://192.168.1.98/cgi/generatebill.py",
             async: false,
             success: function(result) {
                 $("#total-bill").empty();
@@ -417,7 +417,7 @@ function getImageDetails(){
     
       function getVcpus() {
         $.ajax({
-            url: "http://10.0.0.16/cgi/getVcpus.py",
+            url: "http://192.168.1.98/cgi/getVcpus.py",
             async: false,
             success: function(result) {
                 $("#bill-hours-value").empty();
@@ -428,8 +428,9 @@ function getImageDetails(){
     
       function getImageCount() {
         $.ajax({
-            url: "http://10.0.0.16/cgi/images_count.py",
-            sucess: function(result) {
+            url: "http://192.168.1.98/cgi/images_count.py",
+            async: false,
+            success: function(result) {
                $("#imageCount").empty();
                $("#imageCount").append(result);
             }
@@ -470,7 +471,7 @@ function getImageDetails(){
 
 </head>
 
-<body onload="updateCount(); getVcpus(); getImageCount()">
+<body onload="updateCount(); getVcpus(); getImageCount();">
     <div id="wrapper">
         <!-- Navigation -->
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">

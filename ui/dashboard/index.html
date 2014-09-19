@@ -59,7 +59,7 @@ function userAuthnew(){
 	
 	
 	$.ajax({
-        url: "http://10.0.0.16/cgi/authentication.py",
+        url: "http://192.168.1.98/cgi/authentication.py",
         data: {username: userid,userpd: password},
         async:false,
         type: 'POST',
@@ -74,17 +74,17 @@ function userAuthnew(){
         	var msgfrmscript=$.parseJSON(jsonResponse);
         	if(msgfrmscript.msg == "Login Success")
         		{
-        		window.location.replace("http://10.0.0.16/dashboard/charts.html");
+        		window.location.replace("http://192.168.1.98/dashboard/charts.html");
         		}
         	else
         		{
-        		window.location.replace("http://10.0.0.16/dashboard/error-page.html")
+        		window.location.replace("http://192.168.1.98/dashboard/error-page.html")
         		}
          
         },
 	  error: function(data,status,error)
 	   {  
-	   window.location.replace("http://10.0.0.16/dashboard/error-page.html");
+	   window.location.replace("http://192.168.1.98/dashboard/error-page.html");
 		  
 	   }
 	

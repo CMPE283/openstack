@@ -8,14 +8,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
+    <!-- jQuery Version 1.11.0 -->
+    <script src="js/jquery-1.11.0.js"></script>
 
-    <title>Horizon Dashboard</title>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <!-- Morris Charts JavaScript -->
+    <script src="js/plugins/morris/raphael.min.js"></script>
+    <title>Openstack Dashboard</title>
+
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
     <link href="css/sb-admin.css" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="css/plugins/morris.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
     <link href="font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -98,16 +109,15 @@ function deletecookies()
                     var obj = {};
                     var arr = []
                     $.ajax({
-                        url: "http://10.0.0.16/cgi/limits.py",
+                        url: "http://192.168.1.98/cgi/limits.py",
                         async: false,
                         success: function(result){
                             $.each(result, function(k,v){
-                               console.log(k,v)
+                               //console.log(k,v)
                                arr.push(v);
                             });
                         }
                     });
-                    console.log(arr);
                     return arr;
                 })();
             
@@ -147,7 +157,7 @@ function deletecookies()
             network = (networkString.split(" --> ")[1]);
             
             $.ajax({
-                url: "http://10.0.0.16/cgi/cli.py",
+                url: "http://192.168.1.98/cgi/cli.py",
                 data: {
                     image_id: image,
                     flavor_id: flavor,
@@ -178,7 +188,7 @@ function deletecookies()
         $("#show-last5-usage").hide()
         $("#flip").hide();
         $.ajax({
-            url: "http://10.0.0.16/cgi/get_components_list.py",
+            url: "http://192.168.1.98/cgi/get_components_list.py",
             success: function(result){
                 $("#get-list").after(result);
             }
@@ -190,7 +200,7 @@ function deletecookies()
     <script>
 
 /*function getDetails(){
-            $.getJSON("http://10.0.0.16:9000/compute/virtual-machines", function( data ) {
+            $.getJSON("http://192.168.1.98:9000/compute/virtual-machines", function( data ) {
                 //console.log(data);
                 //alert(data);
                 var jsonResponse = data;
@@ -236,7 +246,7 @@ function deletecookies()
 */
 
 function getDetails(){
-            $.getJSON("http://10.0.0.16:9000/compute/virtual-machines/"+usercookie+"/"+pswdcookie, function( data ) {               
+            $.getJSON("http://192.168.1.98:9000/compute/virtual-machines/"+usercookie+"/"+pswdcookie, function( data ) {               
                 var jsonResponse = data;
                    var s = "";
                    var tbody = $('#instanceList tbody'),
@@ -302,7 +312,7 @@ function updateCount(){
     callMakeDivVisible("ListOFServers");    
     getDetails();
     var count = 0;
-    $.getJSON("http://10.0.0.16:9000/compute/virtual-machines/"+usercookie+"/"+pswdcookie, function( data ) {
+    $.getJSON("http://192.168.1.98:9000/compute/virtual-machines/"+usercookie+"/"+pswdcookie, function( data ) {
         var jsonResponse = data;
         $.each(jsonResponse,function(i,val){
             count++;
@@ -498,7 +508,7 @@ function updateCount(){
                         <div id="get-list"> </div>
                     </div>
                     <div> <a><button align="center" type="button" id="create" onclick="createInstance()"> Create </button></a>
-                           &nbsp &nbsp &nbsp &nbsp<a href="http://10.0.0.16/dashboard/index.html"><button align="center" type="button" id="create"> Cancel </button></a>
+                           &nbsp &nbsp &nbsp &nbsp<a href="http://192.168.1.98/dashboard/index.html"><button align="center" type="button" id="create"> Cancel </button></a>
                     </div>
                     <br></br>
                 </div>
