@@ -1,4 +1,7 @@
+
 package controllers;
+
+import static org.jclouds.io.Payloads.newByteSourcePayload;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -8,12 +11,19 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jclouds.ContextBuilder;
-import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
+import org.jclouds.domain.Credentials;
+import org.jclouds.io.Payload;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
+import org.jclouds.openstack.keystone.v2_0.domain.Access;
 import org.jclouds.openstack.neutron.v2.NeutronApi;
 import org.jclouds.openstack.neutron.v2.domain.Network;
 import org.jclouds.openstack.neutron.v2.features.NetworkApi;
+import org.jclouds.openstack.swift.v1.SwiftApi;
+import org.jclouds.openstack.swift.v1.domain.Container;
+import org.jclouds.openstack.swift.v1.features.ContainerApi;
+import org.jclouds.openstack.swift.v1.features.ObjectApi;
+import org.jclouds.openstack.swift.v1.options.PutOptions;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.domain.Address;
 import org.jclouds.openstack.nova.v2_0.domain.Flavor;
@@ -29,29 +39,37 @@ import org.jclouds.openstack.nova.v2_0.features.FlavorApi;
 import org.jclouds.openstack.nova.v2_0.features.ImageApi;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.openstack.nova.v2_0.options.CreateServerOptions;
-import org.jclouds.openstack.v2_0.domain.Limits;
 
-import scala.collection.mutable.HashMap;
-
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Closeables;
+import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.TypeLiteral;
 
 import compute.json.FlavorView;
 import compute.json.ImageView;
 import compute.json.LimitView;
 import compute.json.VMProperties;
+import static com.google.common.io.ByteSource.wrap;
+
 
 public class JCloudsNova implements Closeable {
+	private static final String CONTAINER_NAME = "jclouds-example";
     private final NovaApi novaApi;
     private final Set<String> zones;
     private final NeutronApi neutronApi;
+    private final Access access;
+    private final SwiftApi swiftApi;
     
-    public static void main(String[] args) throws IOException {
-        JCloudsNova jcloudsNova = new JCloudsNova();
+    public static void main(String[] args) throws IOException{
+    	System.out.println("main");;
+    	JCloudsNova jcloudsNova = new JCloudsNova(args[0],args[1]);
         try {
-            jcloudsNova.listServers();
+
+            //jcloudsNova.listServers();
             jcloudsNova.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -68,31 +86,49 @@ public class JCloudsNova implements Closeable {
     }
     
     
-    public JCloudsNova() {
+    public JCloudsNova(String username, String passwd) {
         Iterable<Module> modules = ImmutableSet.<Module>of(new SLF4JLoggingModule());
-        
+        System.out.println("username" + username );        
         String provider = "openstack-nova";
-        String identity = "admin:admin"; // tenantName:userName
-        String credential = "a28d36fd90074d0c";
+        String identity = "admin:" + username; // tenantName:userName
+        String credential = passwd;
+        
+        ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+                .endpoint("http://192.168.1.98:35357/v2.0/")
+                .credentials(identity, credential)
+                .modules(modules)
+                .buildView(ComputeServiceContext.class);
+	    Function<Credentials, Access> auth = context.utils().injector().getInstance(Key.get(new TypeLiteral<Function<Credentials, Access>>(){}));      
+	    access = auth.apply(new Credentials.Builder<Credentials>().identity(identity).credential(credential).build());
+	    System.out.println(access); 
+	    if(access.getToken().getId()!=null){
+		      novaApi = ContextBuilder.newBuilder(provider)
+		                .endpoint("http://192.168.1.98:35357/v2.0/")
+		                .credentials(identity, credential)
+		                .modules(modules)
+		                .buildApi(NovaApi.class);
+		      zones = novaApi.getConfiguredZones();
 
-        novaApi = ContextBuilder.newBuilder(provider)
-                .endpoint("http://10.0.0.16:35357/v2.0/")
-                .credentials(identity, credential)
-                .modules(modules)
-                .buildApi(NovaApi.class);
-        
-        
-        
-        String neutronProvider = "openstack-neutron";
-        neutronApi = ContextBuilder.newBuilder(neutronProvider)
-                .endpoint("http://10.0.0.16:35357/v2.0/")
-                .credentials(identity, credential)
-                .modules(modules)
-                .buildApi(NeutronApi.class);
-       
-        
-        zones = novaApi.getConfiguredZones();
-        System.out.println("............................" + zones );
+		      String neutronProvider = "openstack-neutron";
+		      neutronApi = ContextBuilder.newBuilder(neutronProvider)
+		                .endpoint("http://192.168.1.98:35357/v2.0/")
+		                .credentials(identity, credential)
+		                .modules(modules)
+		                .buildApi(NeutronApi.class);
+		      
+		      String swiftProvider = "openstack-swift";
+		      swiftApi = ContextBuilder.newBuilder(swiftProvider)
+		              .endpoint("http://192.168.1.98:5050/v2.0/")
+		              .credentials(identity, credential)
+		              .modules(modules)
+		              .buildApi(SwiftApi.class);
+	    	
+	    }else{
+	    	novaApi = null;
+	    	neutronApi = null;
+	    	swiftApi = null;
+	    	zones = null;
+	    }
     }
 
     public Set<String> listZones(){
@@ -116,7 +152,6 @@ public class JCloudsNova implements Closeable {
     }
 
     public List<ImageView> listImagesForZone(String zoneId){
-        System.out.println("In Jclouds nova file");
     	ImageApi imageApi = novaApi.getImageApiForZone(zoneId);
     	List<ImageView> imageViewList = new ArrayList<ImageView>();
     	for(Image image:imageApi.listInDetail().concat()){
@@ -128,12 +163,22 @@ public class JCloudsNova implements Closeable {
     	return imageViewList;
     }
     
+    public String saveImage(String zone,String serverId, String newImageName){
+      	ServerApi serverApi = novaApi.getServerApiForZone(zone);
+      	Server server = serverApi.get(serverId);
+      	System.out.println("Server:" + server.getName());
+      	String imageId = serverApi.createImageFromServer(newImageName, serverId);
+      	return imageId;
+      	
+    }
+    
+    
     public List<Network> getNetworksForZone(String zoneId){
     	NetworkApi networkApi = neutronApi.getNetworkApi(zoneId);
         return networkApi.list().concat().toList();
     }
     
-    public List<VMProperties> createNewInstance(String zone,String name,String imageId,String flavorId) throws Exception{
+    public Boolean createNewInstance(String zone,String name,String imageId,String flavorId) throws Exception{
     	ServerApi serverApi = novaApi.getServerApiForZone(zone);
     	if(serverApi !=null){
     		//TODO change this use ServerCreated.builder
@@ -145,7 +190,7 @@ public class JCloudsNova implements Closeable {
     		}else{
     			ServerCreated serverCreated = serverApi.create(name, imageId, flavorId);
     		}
-    		return listServers();
+    		return true;
     	}else{
     		throw new Exception("Not able to get serverApi for zone:"+zone);
     	}
@@ -196,7 +241,7 @@ public class JCloudsNova implements Closeable {
     		throw new Exception("unable to get Quota Deatils");
     	}
     }
-  
+     
     //TODO refractor and use list servers
     private void populateUsedResources(Map<String, LimitView> limitsView) {
 		for(String zone:zones){
@@ -230,7 +275,8 @@ public class JCloudsNova implements Closeable {
         for (String zone : zones) {
             ServerApi serverApi = novaApi.getServerApiForZone(zone);
            // System.out.println("Servers in " + zone);
-           
+         
+        
             ImageApi imageApi = novaApi.getImageApiForZone(zone);
 
             for (Server server : serverApi.listInDetail().concat()) {
@@ -278,8 +324,29 @@ public class JCloudsNova implements Closeable {
         }
         return vmPropertiesList;
     }
-
-    public void close() throws IOException {
+	
+	public void uploadObjectToContainer(String zoneId, String containerId,String objectToUpload){
+	      System.out.println("Upload Object From String");
+	      ObjectApi objectApi = swiftApi.getObjectApiForRegionAndContainer(zoneId, containerId);
+	      Payload payload = newByteSourcePayload(wrap("Hello World".getBytes()));
+	      objectApi.put(objectToUpload, payload, PutOptions.Builder.metadata(ImmutableMap.of("key1", "value1")));	
+	}
+	
+    public Set<Container> listContainers(String zoneId){
+    	
+        ContainerApi containerApi = swiftApi.getContainerApiForRegion("RegionOne");
+        Set<Container> containers = containerApi.list().toSet();
+    	return containers;
+    }
+    
+    public void createContainer(String zoneId, String containerName) {
+        System.out.println("Create Container");
+        ContainerApi containerApi = swiftApi.getContainerApiForRegion(zoneId);
+        containerApi.create(containerName, null);
+        System.out.println("  " + containerName);
+     }
+ 
+	public void close() throws IOException {
         Closeables.close(novaApi, true);
         Closeables.close(neutronApi,true);
     }
