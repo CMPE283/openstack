@@ -36,5 +36,5 @@ def constructPath(tenantId, year, month, currentDay,hostIP, apiPort):
 
 def printHeaders():
     print '<table width="100%" class="table-align">'
-    print '<tr> <th> TENANT </th> <th> START DATE </th> <th> END DATE </th> <th> TOTAL VCPUS USED </th> </tr>'
+    print '<tr> <th> TENANT </th> <th> START DATE </th> <th> END DATE </th> <th> TOTAL VCPUS USED (IN HOURS) </th> </tr>'
 

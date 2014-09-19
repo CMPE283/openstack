@@ -58,6 +58,40 @@
 
 
     <script type="text/javascript">
+    
+        var cookiename="username";
+var cookiepswd="password";
+var usercookie=getCookie(cookiename);
+var pswdcookie=getCookie(cookiepswd);
+
+function setCookie(name,value,days) {
+         if (days) {
+           var date = new Date();
+           date.setTime(date.getTime()+(days*24*60*60*1000));
+           var expires = "; expires="+date.toGMTString();
+         }
+         else var expires = "";
+         document.cookie = name+"="+value+expires+"; path=/"; 
+         //document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+       }
+function getCookie(name) {
+         var nameEQ = name + "=";
+         var ca = document.cookie.split(';');
+         for(var i=0;i < ca.length;i++) {
+           var c = ca[i];
+           while (c.charAt(0)==' ') c = c.substring(1,c.length);
+           if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+         }
+         return null;
+       }
+function deletecookies()
+{ 
+    //document.cookie = usercookie + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    setCookie(cookiename,"",-1);
+    setCookie(cookiepswd,"",-1);
+    }
+
+
         $(function() {
 
             var x = (function() {
@@ -155,7 +189,7 @@
     
     <script>
 
-function getDetails(){
+/*function getDetails(){
             $.getJSON("http://10.0.0.16:9000/compute/virtual-machines", function( data ) {
                 //console.log(data);
                 //alert(data);
@@ -199,6 +233,51 @@ function getDetails(){
                        
                  });
 } 
+*/
+
+function getDetails(){
+            $.getJSON("http://10.0.0.16:9000/compute/virtual-machines/"+usercookie+"/"+pswdcookie, function( data ) {               
+                var jsonResponse = data;
+                   var s = "";
+                   var tbody = $('#instanceList tbody'),
+                   props = ["vmName","imageName","ipAddress","size","status","powerState"];
+                  
+                   $("#instanceList > tbody").html("");
+                        $.each(jsonResponse,function(i,val){
+                            var tr = $('<tr>');
+                            $.each(props, function(i, prop) {
+                            if(i=="5")
+                            {
+                                if(val[prop]=="0")
+                                    {val[prop]="No State";
+                                    $('<td>').html(val[prop]).appendTo(tr);}
+                                else if(val[prop]=="1")
+                                    {val[prop]="Running";
+                                    $('<td>').html(val[prop]).appendTo(tr);}
+                                else if(val[prop]=="3")
+                                    {val[prop]="Paused";
+                                    $('<td>').html(val[prop]).appendTo(tr);}
+                                else if(val[prop]=="4")
+                                    {val[prop]="Shutdown";
+                                    $('<td>').html(val[prop]).appendTo(tr);}
+                                else
+                                    {val[prop]="Unknown State";
+                                    $('<td>').html(val[prop]).appendTo(tr);}
+                                
+                            }else
+                                {
+                            $('<td>').html(val[prop]).appendTo(tr);
+                                }
+                            
+                            });
+                            tbody.append(tr);
+                            
+                         });
+                         $("#instanceList").append(s);    
+                       
+                 });
+} 
+
 
 function callMakeDivVisible(clickedid){
     //alert(clickedid);
@@ -223,7 +302,7 @@ function updateCount(){
     callMakeDivVisible("ListOFServers");    
     getDetails();
     var count = 0;
-    $.getJSON("http://10.0.0.16:9000/compute/virtual-machines", function( data ) {
+    $.getJSON("http://10.0.0.16:9000/compute/virtual-machines/"+usercookie+"/"+pswdcookie, function( data ) {
         var jsonResponse = data;
         $.each(jsonResponse,function(i,val){
             count++;
@@ -254,6 +333,28 @@ function updateCount(){
                 </button>
                 <a class="navbar-brand" href="index.html">OpenStack Dashboard</a>
             </div>
+<!--------------- Modified code starts here -->
+
+            <ul class="nav navbar-right top-nav">
+                 <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> Log Out <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="charts.html"><i class="fa fa-fw fa-dashboard"></i> Home </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="logout.html"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+                        </li>
+                    </ul>
+                </li>
+
+                    </ul>
+                </li>
+            </ul>
+
+<!----------- Modified code ends here -->
+
             <!-- Top Menu Items -->
             <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
